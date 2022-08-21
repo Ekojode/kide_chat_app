@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 
 import '../widgets/auth/auth_form.dart';
@@ -13,10 +14,13 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   final _auth = FirebaseAuth.instance;
+  bool _isLoading = false;
   void _submitAuthForm(
       String email, String password, String? userName, bool isLoginMode) async {
     UserCredential userCredential1;
-
+    setState(() {
+      _isLoading = true;
+    });
     try {
       if (isLoginMode) {
         userCredential1 = await _auth.signInWithEmailAndPassword(
@@ -24,6 +28,15 @@ class _AuthScreenState extends State<AuthScreen> {
       } else {
         userCredential1 = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(userCredential1.user!.uid)
+            .set(
+          {
+            "username": userName,
+            "email": email,
+          },
+        );
       }
     } on PlatformException catch (error) {
       String errorMessage = "An error occurred, Please check login credentials";
@@ -39,17 +52,27 @@ class _AuthScreenState extends State<AuthScreen> {
           content: Text(errorMessage),
         ),
       );
+      setState(() {
+        _isLoading = false;
+      });
     } catch (err) {
-      String errorMessage = "An error occurred, Please check login credentials";
+      // String errorMessage = "An error occurred, Please check login credentials";
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          content: Text(errorMessage),
+          content: Text(err.toString()),
         ),
       );
+      setState(() {
+        _isLoading = false;
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -57,7 +80,13 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
-      body: AuthForm(submitAuthForm: _submitAuthForm),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: Colors.white,
+              ),
+            )
+          : AuthForm(submitAuthForm: _submitAuthForm),
     );
   }
 }
