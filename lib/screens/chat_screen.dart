@@ -6,11 +6,11 @@ class ChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const collectionPath = "chats/FoyOKzh3SXyWreStUCVm/messages";
     return Scaffold(
       body: StreamBuilder(
-        stream: FirebaseFirestore.instance
-            .collection("chats/FoyOKzh3SXyWreStUCVm/messages")
-            .snapshots(),
+        stream:
+            FirebaseFirestore.instance.collection(collectionPath).snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -20,12 +20,13 @@ class ChatScreen extends StatelessWidget {
                 child: Text("No data from cloud"),
               );
             } else {
+              final documents = snapshot.data!.docs;
               return ListView.builder(
-                itemCount: snapshot.data!.docs.length,
+                itemCount: documents.length,
                 itemBuilder: (ctx, i) {
                   return Container(
                     padding: const EdgeInsets.all(8),
-                    child: const Text("This works"),
+                    child: Text(documents[i]["text"]),
                   );
                 },
               );
@@ -36,11 +37,8 @@ class ChatScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
           onPressed: () {
             FirebaseFirestore.instance
-                .collection("chats/FoyOKzh3SXyWreStUCVm/messages")
-                .snapshots()
-                .listen((event) {
-              debugPrint("${event.docs}");
-            });
+                .collection(collectionPath)
+                .add({"text": "This was added by clicking the button"});
           },
           child: const Icon(Icons.add)),
     );
