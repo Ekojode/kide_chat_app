@@ -8,9 +8,26 @@ class AuthForm extends StatefulWidget {
 }
 
 class _AuthFormState extends State<AuthForm> {
+  final _formKey = GlobalKey<FormState>();
+  bool _isLoginMode = true;
+  String? _userEmail;
+  String? _userUserName;
+  String? _userPassword;
+
+  void _trySubmit() {
+    FocusScope.of(context).unfocus();
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    _formKey.currentState!.save();
+    debugPrint(_userEmail);
+    debugPrint(_userUserName);
+    debugPrint(_userPassword);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
     return Center(
       child: Card(
         margin: const EdgeInsets.all(20),
@@ -18,30 +35,72 @@ class _AuthFormState extends State<AuthForm> {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Form(
-              key: formKey,
+              key: _formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextFormField(
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return "Email field cannot be empty";
+                      }
+                      if (!RegExp(
+                              r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                          .hasMatch(value)) {
+                        return "Please enter a valid email!";
+                      } else {
+                        return null;
+                      }
+                    },
                     keyboardType: TextInputType.emailAddress,
                     decoration:
                         const InputDecoration(labelText: "Email Address"),
+                    onSaved: (value) {
+                      _userEmail = value;
+                    },
                   ),
+                  _isLoginMode
+                      ? const SizedBox()
+                      : TextFormField(
+                          validator: (value) {
+                            if (value!.isEmpty || value.length < 4) {
+                              return "Username must be at least 4 characters";
+                            }
+                            return null;
+                          },
+                          decoration:
+                              const InputDecoration(labelText: "Username"),
+                          onSaved: (value) {
+                            _userUserName = value;
+                          },
+                        ),
                   TextFormField(
-                    decoration: const InputDecoration(labelText: "Username"),
-                  ),
-                  TextFormField(
+                    validator: (value) {
+                      if (value!.isEmpty || value.length < 7) {
+                        return "Password must be at least 7 characters";
+                      }
+                      return null;
+                    },
                     decoration: const InputDecoration(labelText: "Password"),
                     obscureText: true,
+                    onSaved: (value) {
+                      _userPassword = value;
+                    },
                   ),
                   const SizedBox(height: 12),
                   ElevatedButton(
-                    onPressed: () {},
-                    child: const Text("Sign Up"),
+                    onPressed: _trySubmit,
+                    child: Text(_isLoginMode ? "Login" : "Sign Up"),
                   ),
                   TextButton(
-                    onPressed: () {},
-                    child: const Text("Create New Account"),
+                    onPressed: () {
+                      setState(() {
+                        _isLoginMode = !_isLoginMode;
+                      });
+                    },
+                    child: Text(_isLoginMode
+                        ? "Create New Account"
+                        : "Login to an existing account"),
                   )
                 ],
               ),

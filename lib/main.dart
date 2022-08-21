@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Chat',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primaryColor: const Color(0xff2F80ED),
       ),
       home: const AuthScreen(),
     );
