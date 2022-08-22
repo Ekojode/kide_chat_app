@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatelessWidget {
@@ -7,7 +8,20 @@ class ChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const collectionPath = "chats/FoyOKzh3SXyWreStUCVm/messages";
+    final auth = FirebaseAuth.instance;
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Kide Chat"),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              auth.signOut();
+            },
+            icon: const Icon(Icons.logout),
+          ),
+        ],
+      ),
       body: StreamBuilder(
         stream:
             FirebaseFirestore.instance.collection(collectionPath).snapshots(),
