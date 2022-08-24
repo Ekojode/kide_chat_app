@@ -32,6 +32,7 @@ class Messages extends StatelessWidget {
                 return MessageBubble(
                   key: ValueKey(documents[i].id),
                   message: documents[i]["text"],
+                  userName: documents[i]["userName"],
                   isMe: documents[i]["userId"] ==
                       FirebaseAuth.instance.currentUser!.uid,
                 );
