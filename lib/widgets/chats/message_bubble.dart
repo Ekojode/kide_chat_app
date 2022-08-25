@@ -4,19 +4,34 @@ class MessageBubble extends StatelessWidget {
   final String message;
   final bool isMe;
   final String userName;
+  final String userImage;
 
-  const MessageBubble(
-      {Key? key,
-      required this.message,
-      required this.isMe,
-      required this.userName})
-      : super(key: key);
+  const MessageBubble({
+    Key? key,
+    required this.message,
+    required this.isMe,
+    required this.userName,
+    required this.userImage,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
+        isMe
+            ? const SizedBox()
+            : Row(
+                children: [
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  CircleAvatar(
+                    backgroundColor: Colors.white,
+                    backgroundImage: NetworkImage(userImage),
+                  ),
+                ],
+              ),
         Container(
           margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
@@ -59,6 +74,19 @@ class MessageBubble extends StatelessWidget {
             ],
           ),
         ),
+        isMe
+            ? Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.white,
+                    backgroundImage: NetworkImage(userImage),
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                ],
+              )
+            : const SizedBox(),
       ],
     );
   }
