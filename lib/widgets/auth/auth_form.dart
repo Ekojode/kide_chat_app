@@ -22,9 +22,23 @@ class _AuthFormState extends State<AuthForm> {
   String? _userPassword;
   File? storedImage;
 
+  void pickedImage(File imagePicked) {
+    storedImage = imagePicked;
+  }
+
   void _trySubmit() {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (storedImage == null && !_isLoginMode) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text("You haven't selected a profile picture yet"),
+          backgroundColor: Theme.of(context).errorColor,
+        ),
+      );
       return;
     }
 
@@ -46,7 +60,11 @@ class _AuthFormState extends State<AuthForm> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _isLoginMode ? const SizedBox() : const UserImagePicker(),
+                  _isLoginMode
+                      ? const SizedBox()
+                      : UserImagePicker(
+                          imagePickerFn: pickedImage,
+                        ),
                   TextFormField(
                     validator: (value) {
                       if (value!.isEmpty) {
